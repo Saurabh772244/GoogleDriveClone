@@ -1,19 +1,20 @@
 import React, { useRef, useState } from 'react'
 import { Card, Form, Button, Alert } from 'react-bootstrap'
-import { Link, useHistory } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Signup() {
     const emailRef = useRef()
     const passwordRef = useRef()
     const passwordConfirmRef = useRef()
-    const { signup } = useAuth()
+    const { signup, logout } = useAuth()
     const [error, setError] = useState('')
+    const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
-    const history = useHistory()
 
     async function handleSubmit(e) {
         e.preventDefault()
+        setMessage('')
 
         if(passwordRef.current.value !== passwordConfirmRef.current.value) {
             return setError('Passwords do not match.')
@@ -22,10 +23,14 @@ export default function Signup() {
         try {
             setError('')
             setLoading(true)
-            await signup(emailRef.current.value, passwordRef.current.value)
-            history.push('/')
-        } catch {
-            setError('Error setting up user.')
+            await signup(emailRef.current.value, passwordRef.current.value).then((res) => {
+                res.user.sendEmailVerification().then(() => {
+                    setMessage('Account created. Please verify your email and login.')
+                })
+            })
+            await logout()
+        } catch (error) {
+            setError(error.message || 'Error setting up user.')
         }
         setLoading(false)
     }
@@ -35,6 +40,7 @@ export default function Signup() {
                 <Card.Body>
                     <h2 className="text-center mb-4"> Sign Up</h2>
                     { error && <Alert variant='danger'>{error}</Alert>}
+                    { message && <Alert variant='success'>{message}</Alert>}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group id="email" className="mb-2">
                             <Form.Label>Email</Form.Label>
