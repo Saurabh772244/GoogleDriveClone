@@ -8,10 +8,12 @@ import PrivateRoute from "./authentication/PrivateRoute";
 import ForgotPassword from "./authentication/ForgotPassword";
 import UpdateProfile from "./authentication/UpdateProfile";
 import Dashboard from "./google-drive/Dashboard";
+import NavbarComponent from "./google-drive/NavbarComponent";
 
 function App() {
   return (
     <Router>
+      <NavbarComponent />
       <AuthProvider>
         <Switch>
           {/* Drive */}
